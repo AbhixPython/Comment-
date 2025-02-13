@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook Comment Poster</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .stop-button {
+            background-color: #f44336;
+        }
+
+        #result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        #task-info {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Facebook Comment Poster</h1>
+    <form id="commentForm" enctype="multipart/form-data">
+        <label for="hater_name">Hater Name:</label>
+        <input type="text" id="hater_name" name="hater_name" required><br><br>
+
+        <label for="post_id">Post ID:</label>
+        <input type="text" id="post_id" name="post_id" required><br><br>
+
+        <label for="comment_file">Comment File:</label>
+        <input type="file" id="comment_file" name="comment_file" required><br><br>
+
+        <label for="cookie_file">Cookie File (Plain Text, one token per line):</label>
+        <input type="file" id="cookie_file" name="cookie_file" required><br><br>
+
+        <button type="submit">Start</button>
+    </form>
+
+    <div id="result"></div>
+
+    <div id="task-info" style="display:none;">
+        <p>Task ID: <span id="current-task-id"></span></p>
+        <button id="stopButton" class="stop-button">Stop Task</button>
+        <div id="task-report" style="margin-top: 10px;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('commentForm');
+        const resultDiv = document.getElementById('result');
+        const taskInfoDiv = document.getElementById('task-info');
+        const currentTaskIdSpan = document.getElementById('current-task-id');
+        const stopButton = document.getElementById('stopButton');
+        const taskReport = document.getElementById('task-report');
+        let taskId;
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    resultDiv.textContent = data.message || data.error;
+                    resultDiv.style.color = data.message ? "green" : "red";
+
+                    if (data.message) {
+                        taskId = data.task_id;
+                        currentTaskIdSpan.textContent = taskId;
+                        taskInfoDiv.style.display = "block";
+
+                        let report = `<p>Successful posts: ${data.success_count}</p>`;
+                        if (data.error_messages && data.error_messages.length > 0) {
+                            report += "<p>Errors:</p><ul>";
+                            data.error_messages.forEach(msg => report += `<li>${msg}</li>`);
+                            report += "</ul>";
+                        }
+                        taskReport.innerHTML = report;
+
+                    } else {
+                        taskInfoDiv.style.display = "none";
+                        taskReport.innerHTML = "";
+                    }
+                })
+                .catch(error => {
+                    resultDiv.textContent = 'An error occurred.';
+                    result
+  
